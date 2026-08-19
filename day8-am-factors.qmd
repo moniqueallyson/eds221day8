@@ -80,7 +80,7 @@ ggplot(
 ```{r}
 gss_cat |> 
   mutate(
-    partyid = fct_collapse(
+    partyid = fct_collapse( # Let's collapse down o four: R, I, D, O (other)
       partyid,
       "R" = c("Strong republican", "Not str republican"),
       "I" = c("Ind,near rep", "Ind,near dem", "Independent"),
