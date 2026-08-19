@@ -1,0 +1,137 @@
+---
+title: "Factors"
+author: 
+    name: "Monique Hernandez"
+    affiliation: University of California, Santa Barbara
+date: "Augustt 19, 2026"
+format:
+  html:
+    toc: true
+execute:
+  message: false
+  warning: false
+---
+
+[click here for github link](https://github.com/moniqueallyson/eds221day7) 
+
+## Read data
+```{r, message=FALSE}
+library(tidyverse)
+library(lubridate)
+
+moorea_coral <- read_csv(
+  "data/moorea_coral.csv",
+  na = c("", "NA", "ND") # This vector tells read_csv() which values to interpret as missing data
+)
+
+moorea_fish <- read_csv(
+  "data/moorea_fish.csv",
+  na = c("", "NA", "ND")
+)
+
+glimpse(moorea_fish) # glimpse moorea fish data
+glimpse(moorea_coral) # glimpse moorea coral data
+```
+
+## Parse real dates
+```{r}
+non_coral <- c(
+  "Sand",
+  "CTB",
+  "Macroalgae",
+  "Non-coralline Crustose Algae",
+  "Unknown or Other"
+)
+
+corals_only <- moorea_coral |> # data is moorea coral
+  filter(
+    !Taxonomy_Substrate_or_Functional_Group %in% non_coral,
+    Depth < 17
+  ) |>
+  mutate("Year" = year(ym(Date)))
+```
+
+## Summarize coral cover
+```{r}
+coral_summary <- corals_only |> # data is moorea coral
+  summarize(
+    quadrant_cover = sum(Percent_Cover, na.rm = TRUE), # quadrat-level percent cover
+    .by = c(Year, Site, Habitat, Depth, Quad40)
+  ) |>
+  summarize(
+    # transect-level percent cover
+    mean_coral_cover = mean(quadrant_cover), #
+    .by = c(Year, Site, Habitat)
+  ) |>
+  arrange(Year, Site, Habitat)
+```
+
+## Wrangle fish date
+## Fish Summary
+```{r}
+fish_summary <- moorea_fish |>
+  filter(Coarse_Trophic == "Primary Consumer") |>
+  summarize(
+    total_biomass = sum(Biomass, na.rm = TRUE),
+    .by = c(Site, Habitat, Year)
+  )
+```
+
+## Join Summaries
+```{r}
+reef_joined <- coral_summary |> # data is coral_summary
+  inner_join(fish_summary, by = join_by(Site, Habitat, Year)) # combining the two data frames by site, habitat, and the year
+```
+
+# Factor Relevel
+
+```{r}
+reef_habitat <- reef_joined |>
+  mutate(Habitat = fct_relevel(Habitat, "Fringing", "Forereef"))
+
+coral_diff_reef <- reef_habitat |>
+  select(Site, Habitat, Year, mean_coral_cover) |>
+  pivot_wider(names_from = Habitat, values_from = mean_coral_cover) |>
+  mutate(coral_cover_difference = abs(Forereef - Fringing))
+```
+
+
+## Histogram
+```{r}
+ggplot(
+  # plotting a graph
+  data = coral_diff_reef,
+  mapping = aes(
+    x = coral_cover_difference
+  )
+) +
+  geom_histogram()
+```
+
+## Scatterplot
+```{r}
+ggplot(
+  data = reef_habitat,
+  mapping = aes(
+    x = mean_coral_cover,
+    y = total_biomass
+  )
+) +
+  geom_point() +
+  facet_wrap(~Site)
+
+site_reorder <- reef_habitat |>
+  mutate(
+    Site = fct_reorder(Site, mean_coral_cover)
+  )
+
+ggplot(
+  data = site_reorder,
+  mapping = aes(
+    x = mean_coral_cover,
+    y = total_biomass
+  )
+) +
+  geom_point() +
+  facet_wrap(~Site)
+```

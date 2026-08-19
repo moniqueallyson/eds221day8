@@ -1,0 +1,46 @@
+---
+title: "Factors"
+author: 
+    name: "Monique Hernandez"
+    affiliation: University of California, Santa Barbara
+date: "Augustt 19, 2026"
+format:
+  html:
+    toc: true
+execute:
+  message: false
+  warning: false
+---
+[click here for github link](https://github.com/moniqueallyson/eds221day8) 
+
+```{r, message=FALSE}
+library(tidyverse)
+library(ggplot2)
+```
+
+# Creating date and time -------------------------------------------------
+
+## Order Matters
+The order of the letters in the function name describe the order of the components in the date string. Under the hood, *dates* are doubles. Days since 1970-01-01.
+
+```{r}
+ymd("2017-01-31")
+mdy("January 31st, 2017")
+dmy("31-Jan-2017")
+
+# type and class of a date
+my_date <- dmy("31-Jan-2017")
+typeof(my_date)
+class(my_date)
+unclass(dmy("31-Jan-1900"))
+
+# Datetimes
+ymd_hms("2017-01-31 20:11:59")
+mdy_hm("1/31/2017 08:01")
+```
+
+# Getting components -----------------------------------------------------
+
+```{r}
+
+```
