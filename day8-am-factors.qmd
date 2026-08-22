@@ -2,11 +2,21 @@
 title: "Factors"
 author: 
     name: "Monique Hernandez"
-    affiliation: University of California, Santa Barbara
+    email: mahernandez@ucsb.edu
+    affiliation: 
+    - University of California, Santa Barbara
+    - Masters of Environmental Data Science, 2027
+    - B.S. in Environmental Studies, 2025
 date: "Augustt 19, 2026"
+toc: true
 format:
   html:
-    toc: true
+    theme: "pulse"
+    other-links:
+      - text: Course Website EDS 221 
+        href: https://eds-221-programming-m26.github.io/course-materials/day8.html
+      - text: Monique's website
+        href: moniqueallyson.github.io
 execute:
   message: false
   warning: false
@@ -18,7 +28,7 @@ library(tidyverse)
 library(ggplot2)
 
 glimpse(gss_cat)
-levels(gss_cat$rincome) 
+levels(gss_cat$rincome)
 ```
 
 ## Boxplot with levels
@@ -28,7 +38,7 @@ ggplot(
   mapping = aes(x = rincome)
 ) + # plus for to continue to plotting
   geom_bar() +
-  theme_bw()+
+  theme_bw() +
   theme(axis.text.x = element_text(angle = 90))
 ```
 
@@ -37,18 +47,17 @@ ggplot(
 gss_cat |> # Changing to "alphabetical order"
   mutate(rincome = as.character(rincome)) |> # changing a column, as.character strips away the levels
   ggplot(
-  mapping = aes(x = rincome)
-) +
+    mapping = aes(x = rincome)
+  ) +
   geom_bar() +
-  theme_bw()+
+  theme_bw() +
   theme(axis.text.x = element_text(angle = 90))
 ```
 
 # Reordering 
 ```{r}
-relig_summary <- gss_cat |> 
-  summarize(tvhours = mean(tvhours, na.rm = TRUE),
-.by = relig)
+relig_summary <- gss_cat |>
+  summarize(tvhours = mean(tvhours, na.rm = TRUE), .by = relig)
 ```
 
 ## Plot
@@ -56,9 +65,8 @@ relig_summary <- gss_cat |>
 ggplot(
   data = relig_summary,
   mapping = aes(x = tvhours, y = relig)
-) + 
+) +
   geom_point() # our categorical axis ir ordered by levels
-
 ```
 
 ## Plot
@@ -66,27 +74,28 @@ ggplot(
 ggplot(
   data = relig_summary,
   mapping = aes(x = tvhours, y = fct_reorder(relig, tvhours))
-) + 
+) +
   geom_point()
 ```
 
 ## Factor Levels Count
 ```{r}
- gss_cat |> 
+gss_cat |>
   count(partyid) #10 party affiliated categories
 ```
 
 ## Factor Collapse
 ```{r}
-gss_cat |> 
+gss_cat |>
   mutate(
-    partyid = fct_collapse( # Let's collapse down o four: R, I, D, O (other)
+    partyid = fct_collapse(
+      # Let's collapse down o four: R, I, D, O (other)
       partyid,
       "R" = c("Strong republican", "Not str republican"),
       "I" = c("Ind,near rep", "Ind,near dem", "Independent"),
       "D" = c("Strong democrat", "Not str democrat"),
       "O" = c("No answer", "Don't know", "Other party")
     )
-  ) |> 
+  ) |>
   count(partyid)
 ```
